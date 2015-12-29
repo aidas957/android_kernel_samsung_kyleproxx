@@ -24,7 +24,6 @@
 #include <linux/earlysuspend.h>
 #endif
 #include <mach/pinmux.h>
-#include <linux/gpio.h>
 
 struct pwm_bl_data {
 	struct pwm_device	*pwm;
@@ -42,12 +41,6 @@ struct pwm_bl_data {
 	struct delayed_work bl_delay_on_work;
 };
 
-static int backlight_mode=1;
-#define DIMMING_VALUE		10
-#define MAX_BRIGHTNESS_VALUE	255
-#define MIN_BRIGHTNESS_VALUE	10
-#define BACKLIGHT_SUSPEND 0
-#define BACKLIGHT_RESUME 1
 /*
 During soft reset, the PWM registers are reset but the pad
 control registers are not.
@@ -60,150 +53,22 @@ the PWM registers are in reset state.
 Hence setting the function of pad cntrl register at 0x3500489C from
 PWM2 to GPIO24 on soft reset.
 */
-
 //static int pwm_pin = -1;
 //static int pwm_pin_reboot_func = -1;
 static int pwm_pin = PN_GPIO24;
 static int pwm_pin_reboot_func = PF_GPIO24;
-extern int backlight_check;
-
-struct brt_value{
-	int level;				// Platform setting values
-	int tune_level;			// Chip Setting values
-};
-
-struct brt_value brt_table[] = {
-   { 10,  7 }, 	
-   { 20,  10 }, 
-   { 30,  16 },
-   { 40,  22 }, 
-   { 50,  28 },
-   { 60,  35 },
-   { 70,  40 },
-   { 80,  45 }, 
-   { 90,  50 }, 
-   { 100,  55 },   
-   { 110,  60 }, 
-   { 120,  65 },
-   { 130,  72 },
-   { 140,  78 },
-   { 150,  85 },
-   { 160,  92 },/* default 160:99 -> 119 */
-   { 165,  98 },
-   { 170,  104 },
-   { 175,  110 },
-   { 180,  115 },
-   { 185,  120 }, 
-   { 190,  125 },
-   { 195,  130 },
-   { 200,  135 },
-   { 205,  140 },
-   { 210,  145 },
-   { 215,  150 },
-   { 220,  155 },
-   { 225,  160 },
-   { 230,  165 },
-   { 235,  170 },
-   { 240,  175 },
-   { 245,  181 },
-   { 250,  187 },
-   { 255,  193 }, /* MAX 190 -> 225 */
-};
-
-struct brt_value brt_table_ilit9806[] = {
-	{ 10,  16 },  
-	{ 20,  22 }, 
-	{ 30,  28 },
-	{ 40,  35 }, 
-	{ 50,  40 },
-	{ 60,  45 },
-	{ 70,  50 },
-	{ 80,  55 }, 
-	{ 90,  60 }, 
-	{ 100,	65 },	
-	{ 110,	72 }, 
-	{ 120,	78 },
-	{ 130,	85 },
-	{ 140,	92 },
-	{ 150,	98 },
-	{ 160,	104 },/* default 160:99 -> 119 */
-	{ 165,	110 },
-	{ 170,	115 },
-	{ 175,	120 },
-	{ 180,	125 },
-	{ 185,	130 }, 
-	{ 190,	135 },
-	{ 195,	140 },
-	{ 200,	145 },
-	{ 205,	150 },
-	{ 210,	155 },
-	{ 215,	160 },
-	{ 220,	165 },
-	{ 225,	170 },
-	{ 230,	175 },
-	{ 235,	181 },
-	{ 240,	187 },
-	{ 245,	193 },
-	{ 250,	199 },
-	{ 255,	205 }, /* MAX 190 -> 225 */
-
-};
-
-#define MAX_BRT_STAGE (int)(sizeof(brt_table)/sizeof(struct brt_value))
-#define MAX_BRT_STAGE_ILI9806 (int)(sizeof(brt_table_ilit9806)/sizeof(struct brt_value))
 
 static int pwm_backlight_update_status(struct backlight_device *bl)
 {
 	struct pwm_bl_data *pb = dev_get_drvdata(&bl->dev);
-	int user_intensity = bl->props.brightness;
 	int brightness = bl->props.brightness;
 	int max = bl->props.max_brightness;
-	int i;
-	
 	printk("[BACKLIGHT] %s : %d\n", __func__, __LINE__);
-
 	if (bl->props.power != FB_BLANK_UNBLANK)
 		brightness = 0;
 
 	if (bl->props.fb_blank != FB_BLANK_UNBLANK)
 		brightness = 0;
-
-	if(backlight_mode != BACKLIGHT_RESUME)
-		return 0;
-
-	if(user_intensity > 0) {
-		if(user_intensity < MIN_BRIGHTNESS_VALUE) {
-			brightness = DIMMING_VALUE; //DIMMING
-		} else if (user_intensity == MAX_BRIGHTNESS_VALUE) {
-			if(backlight_check==1)
-				brightness = brt_table_ilit9806[MAX_BRT_STAGE_ILI9806-1].tune_level;
-			else				
-			brightness = brt_table[MAX_BRT_STAGE-1].tune_level;
-
-		} else {
-			if(backlight_check==1){
-				printk("ILI9806_BACKLIGHT\n");
-				for(i = 0; i < MAX_BRT_STAGE_ILI9806; i++) {
-					if(user_intensity <= brt_table_ilit9806[i].level ) {
-						brightness = brt_table_ilit9806[i].tune_level;
-						break;
-					}					
-				}
-			}	
-			else{
-				printk("NT35510_BACKLIGHT\n");				
-			for(i = 0; i < MAX_BRT_STAGE; i++) {
-				if(user_intensity <= brt_table[i].level ) {
-					brightness = brt_table[i].tune_level;
-					break;
-				}
-			}
-
-			}
-		}
-	}
-
-	printk("[BACKLIGHT] brightness : %d\n", brightness);
 
 	if (pb->notify)
 		brightness = pb->notify(pb->dev, brightness);
@@ -261,8 +126,6 @@ static void backlight_driver_early_suspend(struct early_suspend *h)
 	struct platform_device *pdev = container_of(pb->dev, struct platform_device, dev);
 	struct backlight_device *bl = dev_get_drvdata(&pdev->dev);
 	printk("[BACKLIGHT] %s : %d\n", __func__, __LINE__);
-
-    backlight_mode=BACKLIGHT_SUSPEND;	
 	if( bl->props.brightness) {
 		pwm_config(pb->pwm, 0, pb->period);
 		pwm_disable(pb->pwm);
@@ -276,9 +139,13 @@ static void backlight_driver_late_resume(struct early_suspend *h)
 	struct backlight_device *bl = dev_get_drvdata(&pdev->dev);
 	int brightness = bl->props.brightness;
 	printk("[BACKLIGHT] %s : %d\n", __func__, __LINE__);
-
-    backlight_mode=BACKLIGHT_RESUME;
-    pwm_backlight_update_status(bl);	
+	if (brightness) {
+		brightness = pb->lth_brightness +
+			(brightness * (pb->period - pb->lth_brightness) /
+			bl->props.max_brightness);
+		pwm_config(pb->pwm, brightness, pb->period);
+		pwm_enable(pb->pwm);
+	}
 }
 #endif
 
@@ -420,9 +287,6 @@ static int pwm_backlight_probe(struct platform_device *pdev)
 	pwm_set_polarity(pb->pwm, data->polarity);
 
 	pr_info("pwm_backlight_probe bl-delay-on %d\r\n", bl_delay_on);
-	pr_info("pwm_backlight_probe pwm_pin  %d\r\n", pwm_pin);
-	pr_info("pwm_backlight_probe pwm_pin_reboot_func %d\r\n", pwm_pin_reboot_func);
-
 	if (bl_delay_on == 0)
 		backlight_update_status(bl);
 	else {
@@ -458,8 +322,6 @@ static int pwm_backlight_remove(struct platform_device *pdev)
 	struct platform_pwm_backlight_data *data = pdev->dev.platform_data;
 	struct backlight_device *bl = platform_get_drvdata(pdev);
 	struct pwm_bl_data *pb = dev_get_drvdata(&bl->dev);
-	struct pin_config new_pin_config;
-
 	backlight_device_unregister(bl);
 	pwm_config(pb->pwm, 0, pb->period);
 	pwm_disable(pb->pwm);
@@ -470,22 +332,6 @@ static int pwm_backlight_remove(struct platform_device *pdev)
 		kfree(data);
 		pdev->dev.platform_data = NULL;
 	}
-
-
-	/*reset the pwm pin to GPIO function if defined in the kernel-dtb*/
-	if (pwm_pin >= 0 && pwm_pin_reboot_func >= 0) {
-		pr_info("remove reset the pwm pin to GPIO function\r\n");
-		pr_err("remove reset the pwm pin to GPIO function\r\n");
-		new_pin_config.name = pwm_pin;
-		pinmux_get_pin_config(&new_pin_config);
-		new_pin_config.func = pwm_pin_reboot_func;
-		pinmux_set_pin_config(&new_pin_config);
-
-		gpio_direction_output( 24, 0 );
-		gpio_set_value( 24, 0 );
-
-	}
-
 	return 0;
 }
 
@@ -496,15 +342,10 @@ static void pwm_backlight_shutdown(struct platform_device *pdev)
 	/*reset the pwm pin to GPIO function if defined in the kernel-dtb*/
 	if (pwm_pin >= 0 && pwm_pin_reboot_func >= 0) {
 		pr_info("reset the pwm pin to GPIO function\r\n");
-		pr_err("reset the pwm pin to GPIO function\r\n");
 		new_pin_config.name = pwm_pin;
 		pinmux_get_pin_config(&new_pin_config);
 		new_pin_config.func = pwm_pin_reboot_func;
 		pinmux_set_pin_config(&new_pin_config);
-
-		gpio_direction_output( 24, 0 );
-		gpio_set_value( 24, 0 );
-
 	}
 }
 
