@@ -421,6 +421,17 @@ static void hw_reset(DISPDRV_HANDLE_T drvH, Boolean on)
 	}
 }
 
+static u8 set_bl_seq[] = {
+	2, 0x51, 0xFF, 0x00 /* The Last 0x00 : Sequence End Mark */
+};
+
+void backlight_control(int brigtness)
+{
+	set_bl_seq[2] = brigtness;
+	panel_write(set_bl_seq);
+}
+EXPORT_SYMBOL(backlight_control);
+
 /*
  *
  *   Function Name: LCD_DRV_DispDrv_GetDrvInfo
