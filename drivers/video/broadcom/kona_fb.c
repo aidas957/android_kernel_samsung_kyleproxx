@@ -1543,7 +1543,7 @@ static int __ref kona_fb_probe(struct platform_device *pdev)
 	} else {
 		fb->is_display_found = 1;
 	}
-#if !defined(CONFIG_MACH_HAWAII_SS_GOYA3G) && !defined(CONFIG_MACH_JAVA_SS_VICTOR3G) && !defined(CONFIG_MACH_HAWAII_SS_HEAT)
+#if !defined(CONFIG_MACH_HAWAII_SS_GOYA3G) && !defined(CONFIG_MACH_JAVA_SS_VICTOR3G) && !defined(CONFIG_MACH_HAWAII_SS_HEAT) && !defined(CONFIG_MACH_HAWAII_SS_KYLEPRO) && !defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS)
 	lcd_check = panel_read_id();
 	printk("lcd_check=%d\n", lcd_check);
 	
