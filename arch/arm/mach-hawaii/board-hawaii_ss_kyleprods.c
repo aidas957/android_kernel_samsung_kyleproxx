@@ -1039,13 +1039,13 @@ static struct i2c_board_info __initdata i2c_al3006_info[] = {
 #define ACC_INT_GPIO_PIN  92
 static struct bosch_sensor_specific bss_bma2x2 = {
 	.name = "bma2x2" ,
-        .place = 4,
+        .place = 0,
         .irq = ACC_INT_GPIO_PIN,        
 };
 
 static struct bosch_sensor_specific bss_bmm050 = {
 	.name = "bmm050" ,
-        .place = 4,
+        .place = 0,
 };
 #endif
 
