@@ -288,7 +288,7 @@ int reset_pwm_padcntrl(void)
 	struct pin_config new_pin_config;
 	int ret;
 	new_pin_config.name = PN_GPIO24;
-	new_pin_config.func = PF_GPIO24;
+	new_pin_config.func = PF_PWM2;
 	ret = pinmux_set_pin_config(&new_pin_config);
 	return ret;
 }
@@ -2304,6 +2304,9 @@ static void __init hawaii_add_devices(void)
 	platform_device_register( &bcm_vibrator_device);
 #endif
 
+#ifdef CONFIG_BACKLIGHT_PWM
+	reset_pwm_padcntrl();
+#endif
 }
 
 #ifdef CONFIG_MOBICORE_DRIVER
