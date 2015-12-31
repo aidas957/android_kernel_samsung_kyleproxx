@@ -24,7 +24,7 @@
 #define I2C_BURST_MODE          (1)
 #define I2C_MONOPOLY_MODE       (0)
 
-#define IST30XX_EVENT_MODE      (0)
+#define IST30XX_EVENT_MODE      (1)
 #if IST30XX_EVENT_MODE
 # define IST30XX_NOISE_MODE     (1)
 # define IST30XX_TRACKING_MODE  (1)

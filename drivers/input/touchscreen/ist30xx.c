@@ -82,6 +82,7 @@ int ist30xx_sensitivity_key1 = 0;
 int ist30xx_sensitivity_key2 = 0;
 #define TOUCH_ON 1
 #define TOUCH_OFF 0
+#define BUILT_IN 0
 
 struct device *sec_touchscreen;
 EXPORT_SYMBOL(sec_touchscreen);
@@ -128,11 +129,11 @@ static DEVICE_ATTR(touchkey_menu, S_IRUGO | S_IWUSR | S_IWGRP | S_IXOTH, menu_se
 static DEVICE_ATTR(touchkey_back, S_IRUGO | S_IWUSR | S_IWGRP | S_IXOTH, back_sensitivity_show, NULL);
 static DEVICE_ATTR(touchkey_threshold, S_IRUGO | S_IWUSR | S_IWGRP | S_IXOTH, touchkey_threshold_show, NULL);
 
-//static void fw_update(void *device_data);
+static void fw_update(void *device_data);
 static void get_fw_ver_bin(void *device_data);
 static void get_fw_ver_ic(void *device_data);
 //static void get_config_ver(void *device_data);
-//static void get_threshold(void *device_data);
+static void get_threshold(void *device_data);
 //static void module_off_master(void *device_data);
 //static void module_on_master(void *device_data);
 static void get_chip_vendor(void *device_data);
@@ -143,7 +144,7 @@ static void get_cm_abs(void *device_data);
 //static void get_intensity(void *device_data);
 static void get_x_num(void *device_data);
 static void get_y_num(void *device_data);
-//static void run_reference_read(void *device_data);
+static void run_reference_read(void *device_data);
 static void run_cm_abs_read(void *device_data);
 //static void run_cm_delta_read(void *device_data);
 //static void run_intensity_read(void *device_data);
@@ -152,18 +153,18 @@ static void not_support_cmd(void *device_data);
 //static int check_delta_value(struct melfas_ts_data *ts);
 
 struct tsp_cmd tsp_cmds[] = {
-	{TSP_CMD("fw_update", not_support_cmd),},
+	{TSP_CMD("fw_update", fw_update),},
 	{TSP_CMD("get_fw_ver_bin", get_fw_ver_bin),},
 	{TSP_CMD("get_fw_ver_ic", get_fw_ver_ic),},
 	{TSP_CMD("get_config_ver", not_support_cmd),},
-	{TSP_CMD("get_threshold", not_support_cmd),},
+	{TSP_CMD("get_threshold", get_threshold),},
 	{TSP_CMD("module_off_master", not_support_cmd),},
 	{TSP_CMD("module_on_master", not_support_cmd),},
 	{TSP_CMD("module_off_slave", not_support_cmd),},
 	{TSP_CMD("module_on_slave", not_support_cmd),},
 	{TSP_CMD("get_chip_vendor", get_chip_vendor),},
 	{TSP_CMD("get_chip_name", get_chip_name),},
-	{TSP_CMD("run_rawcap_read", run_cm_abs_read),},
+	{TSP_CMD("run_cm_abs_read", run_cm_abs_read),},
 	{TSP_CMD("get_x_num", get_x_num),},
 	{TSP_CMD("get_y_num", get_y_num),},
 	{TSP_CMD("get_reference", get_reference),},
@@ -171,7 +172,7 @@ struct tsp_cmd tsp_cmds[] = {
 	{TSP_CMD("get_rawcap", get_rawcap),}, 	
 	{TSP_CMD("get_cm_delta", not_support_cmd),},
 	{TSP_CMD("get_intensity", not_support_cmd),},
-	{TSP_CMD("run_reference_read", not_support_cmd),},
+	{TSP_CMD("run_reference_read", run_reference_read),},
 	{TSP_CMD("run_cm_abs_read", not_support_cmd),},
 	{TSP_CMD("run_cm_delta_read", not_support_cmd),},
 	{TSP_CMD("run_intensity_read", not_support_cmd),},
@@ -363,6 +364,56 @@ static void get_chip_name(void *device_data)
 	ts->cmd_state = 2;
 	dev_info(&ts->client->dev, "%s: %s(%d)\n", __func__,
 			buff, strnlen(buff, sizeof(buff)));
+}
+
+static void get_threshold(void *device_data)
+{
+	struct ist30xx_data *ts = (struct ist30xx_data *)device_data;
+	u16 threshold;	
+	char buff[16] = {0};
+	
+	set_default_result(ts);
+	
+	threshold	= 30;
+	
+	snprintf(buff, sizeof(buff), "%d", threshold);
+
+	set_cmd_result(ts, buff, strnlen(buff, sizeof(buff)));
+	ts->cmd_state = 2;
+	dev_info(&ts->client->dev, "%s: %s(%d)\n", __func__,
+			buff, strnlen(buff, sizeof(buff)));
+}
+
+static void fw_update(void *device_data)
+{
+	struct ist30xx_data *ts = (struct ist30xx_data *)device_data;
+	char result[16] = {0};
+       bool ret;
+	   
+	set_default_result(ts);
+
+	switch (ts->cmd_param[0]) {
+	case BUILT_IN:
+	      printk("[TSP] %s\n",__func__);
+	      ret =  ist30xx_force_fw_update(ts_data);
+		if(ret<0) {
+			ts->cmd_state = 3;
+			return;
+		}
+		break;
+	default:
+		printk("invalid fw file type!!\n");
+		goto not_support;
+	}
+
+	ts->cmd_state = 2;
+	snprintf(result, sizeof(result) , "%s", "OK");
+	set_cmd_result(ts, result,
+				strnlen(result, sizeof(result)));
+not_support:
+	snprintf(result, sizeof(result) , "%s", "NG");
+	set_cmd_result(ts, result, strnlen(result, sizeof(result)));
+	return;
 }
 
 extern TSP_INFO ist30xx_tsp_info;
@@ -702,6 +753,31 @@ static void check_reference_value(struct ist30xx_data *ts)
 
 static void get_reference(void *device_data)
 {
+	struct ist30xx_data *info = (struct ist30xx_data *)device_data;
+
+	char buff[16] = {0};
+	unsigned int val;
+	int node;
+
+	printk("[TSP] %s, %d\n", __func__, __LINE__ );
+
+	set_default_result(info);
+	node = check_rx_tx_num(info);
+
+	if (node < 0)
+		return;
+
+	val = cm_abs[node];
+	snprintf(buff, sizeof(buff), "%u", val);
+	set_cmd_result(info, buff, strnlen(buff, sizeof(buff)));
+	info->cmd_state = 2;
+
+	dev_info(&info->client->dev, "%s: %s(%d)\n", __func__, buff,
+			strnlen(buff, sizeof(buff)));
+}
+
+static void run_reference_read(void *device_data)
+{
 	struct ist30xx_data *ts = (struct ist30xx_data *)device_data;
 	printk("[TSP] %s\n", __func__);
 	set_default_result(ts);
@@ -709,6 +785,7 @@ static void get_reference(void *device_data)
 	ts->cmd_state = 2;
 	dev_info(&ts->client->dev, "%s:\n", __func__);
 }
+
 static ssize_t phone_firmware_show(struct device *dev, struct device_attribute *attr, char *buf)
 {   
 	u32 val = 0;	
@@ -1971,8 +2048,8 @@ static int __devinit ist30xx_probe(struct i2c_client *		client,
 
 	set_bit(EV_ABS, input_dev->evbit);
 	set_bit(INPUT_PROP_DIRECT, input_dev->propbit);
-	//set_bit(EV_LED, input_dev->evbit);
-	//set_bit(LED_MISC, input_dev->ledbit);
+	set_bit(EV_LED, input_dev->evbit);
+	set_bit(LED_MISC, input_dev->ledbit);
 
 	input_set_abs_params(input_dev, ABS_MT_POSITION_X, 0, IST30XX_MAX_X, 0, 0);
 	input_set_abs_params(input_dev, ABS_MT_POSITION_Y, 0, IST30XX_MAX_Y, 0, 0);
