@@ -27,6 +27,7 @@ obj-$(CONFIG_MACH_HAWAII_SS_CS02) += hawaii.o board-hawaii_ss_cs02.o hawaii_ss_c
 obj-$(CONFIG_MACH_HAWAII_SS_GOYA3G) += hawaii.o board-hawaii_ss_goya3g.o hawaii_ss_goya3g_wifi.o board-bcm59xxx-ss-goya3g.o hawaii_modem_detect.o
 obj-$(CONFIG_MACH_HAWAII_SS_KYLEVE) += hawaii.o board-hawaii_ss_kyleve.o hawaii_ss_kyleve_wifi.o board-bcm59xxx-ss-kyleve.o
 obj-$(CONFIG_MACH_HAWAII_SS_KYLEPRO) += hawaii.o board-hawaii_ss_kylepro.o hawaii_ss_kylepro_wifi.o board-bcm59xxx-ss-kylepro.o
+obj-$(CONFIG_MACH_HAWAII_SS_KYLEPRODS) += hawaii.o board-hawaii_ss_kyleprods.o hawaii_ss_kyleprods_wifi.o board-bcm59xxx-ss-kyleprods.o
 obj-$(CONFIG_MACH_HAWAII_SS_GOLDENVEN) += hawaii.o board-hawaii_ss_goldenven.o hawaii_ss_goldenven_wifi.o board-bcm59xxx-ss-goldenven.o board-tsp-mxt224s.o
 obj-$(CONFIG_MACH_HAWAII_SS_CODINAN) += hawaii.o board-hawaii_ss_codinan.o hawaii_ss_codinan_wifi.o board-bcm59xxx-ss-codinan.o board-tsp-mxt224s.o
 obj-$(CONFIG_MACH_HAWAII_FPGA) += hawaii_fpga.o

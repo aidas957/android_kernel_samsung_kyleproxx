@@ -81,7 +81,7 @@ extern inline struct camdrv_ss_state *to_state(struct v4l2_subdev *sd);
 
 #define EXIF_MODEL			"SM-G350"
 
-#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00)
+#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS_REV00)
 #define VCAM_A_2_8V_REGULATOR		"mmcldo1"
 #define VCAM_IO_1_8V_REGULATOR		"lvldo2"
 #define VCAM_CORE_1_2V_REGULATOR	"vsrldo"
@@ -95,7 +95,11 @@ extern inline struct camdrv_ss_state *to_state(struct v4l2_subdev *sd);
 	#define CAM1_STNBY			005
 #define VCAM0_IO_1_8V_REGULATOR		"lvldo1" //temp coz logands 2a changed as goldenve
 
-#define EXIF_MODEL			"GT-S7580"
+#if defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00)
+    #define EXIF_MODEL		"GT-S7580"
+#else
+    #define EXIF_MODEL		"GT-S7582"
+#endif
 
 #elif defined(CONFIG_MACH_HAWAII_SS_GOYA3G)
 #define VCAM_A_2_8V_REGULATOR		"mmcldo1"

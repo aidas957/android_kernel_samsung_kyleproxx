@@ -103,7 +103,7 @@
 #define WAKE_LOCK_TIME				(HZ * 5)	/* 5 sec */
 #define SEND_END_WAKE_LOCK_TIME			(HZ * 2)	/* 2 sec */
 
-#if defined(CONFIG_MACH_HAWAII_SS_CS02) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRO)
+#if defined(CONFIG_MACH_HAWAII_SS_CS02) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRO) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS)
 	#define COMP1_THRESHOLD (650)
 #else
 	#define COMP1_THRESHOLD (790)
@@ -309,7 +309,7 @@ static const CHAL_ACI_filter_config_comp_t comp_values_for_button_press = {
 #if defined (CONFIG_MACH_HAWAII_SS_LOGAN) || defined(CONFIG_MACH_HAWAII_SS_LOGANDS)\
  || defined(CONFIG_MACH_HAWAII_SS_KYLEVE) || defined(CONFIG_MACH_HAWAII_SS_HEAT)
 	0xA00,			/* = M = 2560 / 32768 => 78ms */
-#elif defined(CONFIG_MACH_HAWAII_SS_CS02) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRO)/* CONFIG_MACH_HAWAII_SS_LOGAN */
+#elif defined(CONFIG_MACH_HAWAII_SS_CS02) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRO) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS)/* CONFIG_MACH_HAWAII_SS_LOGAN */
 	0x500,			/* = M = 1280 / 32768 => 39ms */
 #else
 	0x500,

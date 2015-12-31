@@ -197,7 +197,7 @@ static struct regulator *VCAM_CORE_1_2_V;
 #define GPIO_CAM_FLASH_SET		34
 #define GPIO_CAM_FLASH_EN		33
 #define EXIF_MODEL		"GT-S7392"
-#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00)
+#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS_REV00)
 #define VCAM_A_2_8V_REGULATOR		"mmcldo1"
 #define VCAM_IO_1_8V_REGULATOR		"lvldo1"
 #define VCAM1_IO_1_8V_REGULATOR		"lvldo2"
@@ -218,7 +218,13 @@ static struct regulator *VCAM_CORE_1_2_V;
 #define CAM1_STNBY	005
 #define GPIO_CAM_FLASH_SET		34
 #define GPIO_CAM_FLASH_EN		33
-#define EXIF_MODEL		"GT-S7580"
+
+#if defined(CONFIG_MACH_HAWAII_SS_KYLEPRO_REV00)
+    #define EXIF_MODEL		"GT-S7580"
+#else
+    #define EXIF_MODEL		"GT-S7582"
+#endif
+
 #elif defined(CONFIG_MACH_HAWAII_SS_GOLDENVEN)\
 	|| defined(CONFIG_MACH_HAWAII_SS_CODINAN)
 #define VCAM_A_2_8V_REGULATOR		"mmcldo1"
@@ -2454,7 +2460,7 @@ static int camdrv_ss_s5k4ecgx_set_touch_focus_area(struct v4l2_subdev *sd, enum 
         if (FirstWinStartY+AF_OUTER_WINDOW_HEIGHT > preview_height)
             FirstWinStartY = preview_height-AF_OUTER_WINDOW_HEIGHT-1;
 
-#elif defined (CONFIG_MACH_HAWAII_SS_KYLEPRO)
+#elif defined (CONFIG_MACH_HAWAII_SS_KYLEPRO) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS_REV00)
 	 lx = preview_width - touch_area->leftTopX;
 	 ly = preview_height - touch_area->leftTopY;
         SecondWinStartX = lx - ( (AF_INNER_WINDOW_WIDTH - touch_area->rightBottomX) / 2 );

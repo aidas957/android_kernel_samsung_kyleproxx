@@ -82,7 +82,7 @@ static int USB_MDIO[6] = {
 	0x0000			/* MDIO Register 5 initial value 0x0000 */
 };
 
-#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO)
+#elif defined(CONFIG_MACH_HAWAII_SS_KYLEPRO) || defined(CONFIG_MACH_HAWAII_SS_KYLEPRODS)
 
 static int USB_MDIO[6] = {
 	0x0018,			/* MDIO Register 0 initial value 0x0000 */

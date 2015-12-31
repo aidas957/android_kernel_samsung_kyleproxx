@@ -170,6 +170,12 @@ config	MACH_HAWAII_SS_KYLEPRO_REV00
 	  Support for the Broadcom Hawaii SS kylepro board.
 	  Assumes that MACH_HAWAII_SS_KYLEPRO is also set.
 
+config	MACH_HAWAII_SS_KYLEPRODS_REV00
+	bool "Support Broadcom Hawaii SS kyleprods board"
+	help
+	  Support for the Broadcom Hawaii SS kyleprods board.
+	  Assumes that MACH_HAWAII_SS_KYLEPRODS is also set.
+
 config	MACH_HAWAII_SS_GOYA3G_REV02
 	bool "Support Broadcom Hawaii SS GOYA3G board"
 	help
@@ -395,6 +401,12 @@ config	MACH_HAWAII_SS_KYLEPRO
 	default n
 	help
 	  Support for the Broadcom Hawaii Samsung KYLEPRO board.
+
+config	MACH_HAWAII_SS_KYLEPRODS
+	bool "Support Broadcom Hawaii Samsung KYLEPRODS board"
+	default n
+	help
+	  Support for the Broadcom Hawaii Samsung KYLEPRODS board.
 
 config	MACH_HAWAII_SS_GOYA3G
 	bool "Support Broadcom Hawaii Samsung GOYA3G board"
