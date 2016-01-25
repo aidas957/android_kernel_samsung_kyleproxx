@@ -744,7 +744,8 @@ struct kona_freq_tbl kona_freq_tbl[] = {
 PI_OPP_SUPER_TURBO, 85),
         FTBL_INIT(1800000,
 PI_OPP_SUPER_TURBO, 85),
-        FTBL_INIT(1900000, PI_OPP_SUPER_TURBO, 85),
+        FTBL_INIT(1900000,
+PI_OPP_SUPER_TURBO, 85),
         FTBL_INIT(2000000,
 PI_OPP_SUPER_TURBO, 85),
 };
